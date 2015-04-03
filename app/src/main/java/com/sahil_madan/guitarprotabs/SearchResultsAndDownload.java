@@ -35,11 +35,10 @@ import java.util.regex.Pattern;
 public class SearchResultsAndDownload extends ActionBarActivity {
 
     private ArrayList<GPTab> tabs;
-
-    private int current_page_ind = 1;
-    private int last_page_ind = -1;
-
-    private String search_input = null;
+    private static String userAgent = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36";
+    private String searchQuery = null;
+    private int currentPageIndex = 1;
+    private int lastPageIndex = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,11 +48,9 @@ public class SearchResultsAndDownload extends ActionBarActivity {
         tabs = new ArrayList<>();
 
         Intent intent = getIntent();
-        search_input = intent.getStringExtra(StartSearch.EXTRA_SEARCH_INPUT);
+        searchQuery = processQueryForSearch(intent.getStringExtra(StartSearch.EXTRA_SEARCH_INPUT));
 
-        String url = getURL(search_input, 1);
-
-        new GetUGTabsTask(this).execute(url);
+        new GetUGTabsTask(this).execute(getURL());
     }
 
     @Override
@@ -78,31 +75,35 @@ public class SearchResultsAndDownload extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private String getURL(String search_input, int page)
+    /* Return a Ultimate Guitar URL */
+    private String getURL()
     {
-        String processed_input = "";
+        String searchURL = "http://www.ultimate-guitar.com/search.php?title=%1$s&page=%2$d&tab_type_group=text&app_name=ugt&type=500&order=title_srt";
+        return String.format(searchURL, searchQuery, currentPageIndex);
+    }
+
+
+    private String processQueryForSearch(String rawQuery)
+    {
+        String processedQuery = "";
         boolean prev_space = false;
-        for (int i = 0; i < search_input.length(); ++i) {
-            Character c = search_input.charAt(i);
+        for (int i = 0; i < rawQuery.length(); ++i) {
+            Character c = rawQuery.charAt(i);
             if (Character.isLetter(c)) {
-                processed_input += Character.toLowerCase(c);
+                processedQuery += Character.toLowerCase(c);
                 prev_space = false;
             } else if (Character.isDigit(c)) {
-                processed_input += c;
+                processedQuery += c;
                 prev_space = false;
             } else if ((Character.isSpaceChar(c) || c.equals('\n')) && !prev_space) {
-                processed_input += '+';
+                processedQuery += '+';
                 prev_space = true;
             } else if (!(Character.isSpaceChar(c) || c.equals('\n'))) {
                 prev_space = false;
             }
         }
 
-        return "http://www.ultimate-guitar.com/search.php?title="
-        + processed_input
-        + "&page="
-        + Integer.toString(page)
-        +"&tab_type_group=text&app_name=ugt&type=500&order=title_srt";
+        return processedQuery;
     }
 
     public void downloadTab(View view)
@@ -115,71 +116,72 @@ public class SearchResultsAndDownload extends ActionBarActivity {
 
     public void jumpFirstPage(View view)
     {
-        String url = getURL(search_input, 1);
-        current_page_ind = 1;
+        currentPageIndex = 1;
+        String url = getURL();
         new GetUGTabsTask(this).execute(url);
     }
 
     public void jumpPrevPage(View view)
     {
-        String url = getURL(search_input, current_page_ind - 1);
-        current_page_ind -= 1;
+        currentPageIndex -= 1;
+        String url = getURL();
         new GetUGTabsTask(this).execute(url);
     }
 
     public void jumpNextPage(View view)
     {
-        String url = getURL(search_input, current_page_ind + 1);
-        current_page_ind += 1;
+        currentPageIndex += 1;
+        String url = getURL();
         new GetUGTabsTask(this).execute(url);
     }
 
     public void jumpLastPage(View view)
     {
-        String url = getURL(search_input, last_page_ind);
-        current_page_ind = last_page_ind;
+        currentPageIndex = lastPageIndex;
+        String url = getURL();
         new GetUGTabsTask(this).execute(url);
     }
 
+    /* Task searches UG and gets tab results, updating the layout in the process */
     private class GetUGTabsTask extends AsyncTask<String, Void, Document> {
 
         Activity activity = null;
-        TextView search_notabs = null;
-        ProgressBar search_progress = null;
-        ListView search_results = null;
-        LinearLayout page_buttons = null;
-        Button first_page = null;
-        Button prev_page = null;
-        Button next_page = null;
-        Button last_page = null;
+        TextView noTabsText = null;
+        ProgressBar searchProgress = null;
+        ListView searchResultsList = null;
+        LinearLayout pageButtonsLayout = null;
+        Button firstPageButton = null;
+        Button prevPageButton = null;
+        Button nextPageButton = null;
+        Button lastPageButton = null;
 
         public GetUGTabsTask(Activity activity)
         {
             this.activity = activity;
-            search_progress = (ProgressBar) this.activity.findViewById(R.id.gpsearch_progress);
-            search_notabs = (TextView) this.activity.findViewById(R.id.gpsearch_notabs);
-            search_results = (ListView) this.activity.findViewById(R.id.gptablist);
-            page_buttons = (LinearLayout) this.activity.findViewById(R.id.gp_search_page_buttons);
-            first_page = (Button) this.activity.findViewById(R.id.gp_search_page_first);
-            prev_page = (Button) this.activity.findViewById(R.id.gp_search_page_prev);
-            next_page = (Button) this.activity.findViewById(R.id.gp_search_page_next);
-            last_page = (Button) this.activity.findViewById(R.id.gp_search_page_last);
+            searchProgress = (ProgressBar) this.activity.findViewById(R.id.gpsearch_progress);
+            noTabsText = (TextView) this.activity.findViewById(R.id.gpsearch_notabs);
+            searchResultsList = (ListView) this.activity.findViewById(R.id.gptablist);
+            pageButtonsLayout = (LinearLayout) this.activity.findViewById(R.id.gp_search_page_buttons);
+            firstPageButton = (Button) this.activity.findViewById(R.id.gp_search_page_first);
+            prevPageButton = (Button) this.activity.findViewById(R.id.gp_search_page_prev);
+            nextPageButton = (Button) this.activity.findViewById(R.id.gp_search_page_next);
+            lastPageButton = (Button) this.activity.findViewById(R.id.gp_search_page_last);
         }
 
         @Override
         protected void onPreExecute()
         {
-            search_progress.setVisibility(View.VISIBLE);
-            search_notabs.setVisibility(View.INVISIBLE);
-            search_results.setVisibility(View.INVISIBLE);
-            page_buttons.setVisibility(View.GONE);
+            searchProgress.setVisibility(View.VISIBLE);
+            noTabsText.setVisibility(View.INVISIBLE);
+            searchResultsList.setVisibility(View.INVISIBLE);
+            pageButtonsLayout.setVisibility(View.GONE);
         }
 
         @Override
         protected Document doInBackground(String... urls) {
             try {
                 Connection.Response res = Jsoup.connect(urls[0])
-                        .userAgent("Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36")
+                        .userAgent(userAgent)
                         .execute();
 
                 if (res == null || res.statusCode() != 200) {
@@ -199,134 +201,140 @@ public class SearchResultsAndDownload extends ActionBarActivity {
 
         @Override
         protected void onPostExecute(Document doc) {
+            // If doc returns null, there was a network error of some sort
             if (doc == null) {
-                search_progress.setVisibility(View.INVISIBLE);
-                search_notabs.setVisibility(View.VISIBLE);
-                search_results.setVisibility(View.INVISIBLE);
-                page_buttons.setVisibility(View.GONE);
+                searchProgress.setVisibility(View.INVISIBLE);
+                noTabsText.setVisibility(View.VISIBLE);
+                searchResultsList.setVisibility(View.INVISIBLE);
+                pageButtonsLayout.setVisibility(View.GONE);
+                Toast.makeText(activity, activity.getString(R.string.gpsearch_networkerror), Toast.LENGTH_SHORT).show();
                 return;
             }
+
             // Create TabList Items
             tabs.clear();
 
-            String current_artist = "";
+            // Scrape page for tabs
+            String currentArtist = "";
             Elements elements = doc.select("a.song, span.r_1, span.r_2, span.r_3, span.r_4, span.r_5, b.ratdig");
-            boolean obtain_rating = false;
-            boolean obtain_votes = false;
+            boolean obtainRating = false;
+            boolean obtainVotes = false;
             for (Element em : elements) {
                 // Skip Tab Pro tabs
                 if (em.hasClass("js-tp_link")) {
-                    obtain_rating = false;
-                    obtain_votes = false;
+                    obtainRating = false;
+                    obtainVotes = false;
                     continue;
                 }
 
                 // If New Artist Found
                 if (em.hasClass("search_art")) {
-                    current_artist = em.text();
+                    currentArtist = em.text();
                     continue;
                 }
 
                 // If new Tab Found
                 if (em.hasClass("song")) {
-                    obtain_rating = true;
-                    obtain_votes = true;
+                    obtainRating = true;
+                    obtainVotes = true;
                     String link = em.attr("href");
-                    GPTab tab = new GPTab(current_artist, em.text(), -1, -1, link);
+                    GPTab tab = new GPTab(currentArtist, em.text(), -1, -1, link);
                     tabs.add(tab);
                     continue;
                 }
 
-                if (obtain_rating) {
+                if (obtainRating) {
                     if (em.hasClass("r_1")) {
                         tabs.get(tabs.size() - 1).rating = 1;
-                        obtain_rating = false;
+                        obtainRating = false;
                         continue;
                     } else if (em.hasClass("r_2")) {
                         tabs.get(tabs.size() - 1).rating = 2;
-                        obtain_rating = false;
+                        obtainRating = false;
                         continue;
                     } else if (em.hasClass("r_3")) {
                         tabs.get(tabs.size() - 1).rating = 3;
-                        obtain_rating = false;
+                        obtainRating = false;
                         continue;
                     } else if (em.hasClass("r_4")) {
                         tabs.get(tabs.size() - 1).rating = 4;
-                        obtain_rating = false;
+                        obtainRating = false;
                         continue;
                     } else if (em.hasClass("r_5")) {
                         tabs.get(tabs.size() - 1).rating = 5;
-                        obtain_rating = false;
+                        obtainRating = false;
                         continue;
                     }
                 }
 
-                if (obtain_votes && em.hasClass("ratdig")) {
+                if (obtainVotes && em.hasClass("ratdig")) {
                     tabs.get(tabs.size() - 1).votes = Integer.parseInt(em.text());
-                    obtain_votes = false;
+                    obtainVotes = false;
                 }
             }
 
-            // Update Layout
+            // Update layout where no tabs found
             if (tabs.size() == 0) {
-                search_progress.setVisibility(View.INVISIBLE);
-                search_notabs.setVisibility(View.VISIBLE);
-                search_results.setVisibility(View.INVISIBLE);
-                page_buttons.setVisibility(View.GONE);
+                searchProgress.setVisibility(View.INVISIBLE);
+                noTabsText.setVisibility(View.VISIBLE);
+                searchResultsList.setVisibility(View.INVISIBLE);
+                pageButtonsLayout.setVisibility(View.GONE);
                 return;
             }
-            search_progress.setVisibility(View.INVISIBLE);
-            search_notabs.setVisibility(View.INVISIBLE);
-            search_results.setVisibility(View.VISIBLE);
-            page_buttons.setVisibility(View.VISIBLE);
+
+            // Update layout where tabs found
+            searchProgress.setVisibility(View.INVISIBLE);
+            noTabsText.setVisibility(View.INVISIBLE);
+            searchResultsList.setVisibility(View.VISIBLE);
+            pageButtonsLayout.setVisibility(View.VISIBLE);
 
             GPTabAdapter adapter = new GPTabAdapter(this.activity, tabs);
             ListView gptablist = (ListView) findViewById(R.id.gptablist);
             gptablist.setAdapter(adapter);
 
-            // Get the index of the last page (assume already obtained if current_page != 1)
-            if (current_page_ind == 1) {
+            // Get the index of the last page (assume already obtained if lastPage != -1)
+            if (lastPageIndex == -1) {
                 Elements page_details = doc.select("div.paging a");
-                last_page_ind = -1;
+                lastPageIndex = -1;
                 for (Element pg : page_details) {
                     if (pg.text().equals("Next") || pg.text().equals("Prev")) {
                         continue;
                     }
                     int value = Integer.parseInt(pg.text());
-                    if (value > last_page_ind) {
-                        last_page_ind = value;
+                    if (value > lastPageIndex) {
+                        lastPageIndex = value;
                     }
                 }
             }
 
             // Enable Jump-Page buttons
-            if (last_page_ind == -1) {
-                first_page.setEnabled(false);
-                prev_page.setEnabled(false);
-                last_page.setEnabled(false);
-                next_page.setEnabled(false);
+            if (lastPageIndex == -1) {
+                firstPageButton.setEnabled(false);
+                prevPageButton.setEnabled(false);
+                lastPageButton.setEnabled(false);
+                nextPageButton.setEnabled(false);
             }
 
-            if (current_page_ind > 2) {
-                first_page.setEnabled(true);
-                prev_page.setEnabled(true);
-            } else if (current_page_ind == 2) {
-                first_page.setEnabled(false);
-                prev_page.setEnabled(true);
+            if (currentPageIndex > 2) {
+                firstPageButton.setEnabled(true);
+                prevPageButton.setEnabled(true);
+            } else if (currentPageIndex == 2) {
+                firstPageButton.setEnabled(false);
+                prevPageButton.setEnabled(true);
             } else {
-                first_page.setEnabled(false);
-                prev_page.setEnabled(false);
+                firstPageButton.setEnabled(false);
+                prevPageButton.setEnabled(false);
             }
 
-            if (current_page_ind < (last_page_ind - 1)) {
-                last_page.setEnabled(true);
-                next_page.setEnabled(true);
-            } else if (current_page_ind == (last_page_ind - 1)) {
-                last_page.setEnabled(false);
-                next_page.setEnabled(true);
+            if (currentPageIndex < (lastPageIndex - 1)) {
+                lastPageButton.setEnabled(true);
+                nextPageButton.setEnabled(true);
+            } else if (currentPageIndex == (lastPageIndex - 1)) {
+                lastPageButton.setEnabled(false);
+                nextPageButton.setEnabled(true);
             } else {
-                last_page.setEnabled(false);
-                next_page.setEnabled(false);
+                lastPageButton.setEnabled(false);
+                nextPageButton.setEnabled(false);
             }
         }
     }
@@ -342,18 +350,14 @@ public class SearchResultsAndDownload extends ActionBarActivity {
 
         protected void onPreExecute()
         {
-            Toast.makeText(activity, "Downloading tab", Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, activity.getString(R.string.tab_downloading), Toast.LENGTH_SHORT).show();
         }
-
-        private String userAgent = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36";
-        private String referrer = "http://www.google.com";
 
         protected Connection.Response doInBackground(String... urls)
         {
             try {
                 Connection.Response res = Jsoup.connect(urls[0])
                         .userAgent(userAgent)
-                        .referrer(referrer)
                         .execute();
 
                 Document doc = res.parse();
@@ -438,7 +442,9 @@ public class SearchResultsAndDownload extends ActionBarActivity {
 
             // Save data into file
             try {
-                file.createNewFile();
+                if (!file.createNewFile()) {
+                    return null;
+                }
                 BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
                 bos.write(data);
                 bos.flush();
