@@ -5,4 +5,4 @@ Search and download Guitar Pro tabs on an Android device, for use alongside the 
 
 #### Preview
 ![alt tag](http://i.imgur.com/ZzZy33g.png)
-![alt tag](http://i.imgur.com/uYWT8md.png)
+![alt tag](http://i.imgur.com/uYWT8md.png?1)
