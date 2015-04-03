@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <TextView
+        android:id="@id/gptabitem_artist"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:text="Artist" />
+    <TextView
+        android:id="@id/gptabitem_song"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:text="Song"
+        android:textSize="@dimen/abc_text_size_body_1_material" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@id/gptabitem_rating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:text="Rating"
+            android:paddingBottom="@dimen/abc_button_inset_vertical_material"
+            android:textSize="@dimen/abc_text_size_small_material"/>
+        <Button
+            android:id="@id/gptabitem_download"
+            android:text="@string/tab_item_download"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:onClick="downloadTab"/>
+    </RelativeLayout>
+</LinearLayout>

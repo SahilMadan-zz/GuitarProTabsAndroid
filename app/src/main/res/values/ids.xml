@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="gp_searchbar" type="id" />
+    <item name="gptabitem_artist" type="id" />
+    <item name="gptabitem_song" type="id" />
+    <item name="gptabitem_rating" type="id" />
+    <item name="gptabitem_download" type="id" />
+    <item name="gpsearch_progress" type="id" />
+    <item name="gpsearch_notabs" type="id" />
+    <item name="gptablist" type="id" />
+
+    <item name="gp_search_page_buttons" type="id" />
+    <item name="gp_search_page_first" type="id" />
+    <item name="gp_search_page_prev" type="id" />
+    <item name="gp_search_page_next" type="id" />
+    <item name="gp_search_page_last" type="id" />
+</resources>
