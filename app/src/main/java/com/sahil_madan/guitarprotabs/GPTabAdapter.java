@@ -8,14 +8,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.sahil_madan.guitarprotabs.GPTab;
-import com.sahil_madan.guitarprotabs.R;
-
 import java.util.ArrayList;
 
-/**
- * Created by sahil on 23/03/2015.
- */
 public class GPTabAdapter extends ArrayAdapter<GPTab> {
     Context context;
     public GPTabAdapter(Context context, ArrayList<GPTab> tabs)
@@ -40,7 +34,8 @@ public class GPTabAdapter extends ArrayAdapter<GPTab> {
         if (tab.rating == -1) {
             rating.setText(context.getString(R.string.tab_item_norating));
         } else {
-            rating.setText("Average Rating: " + Integer.toString(tab.rating) + " (" + Integer.toString(tab.votes) + " Votes)");
+            String avg_rating = context.getString(R.string.tab_item_rating);
+            rating.setText(String.format(avg_rating, tab.rating, tab.votes));
         }
         Button download = (Button) convertView.findViewById(R.id.gptabitem_download);
 

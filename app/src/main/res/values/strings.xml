@@ -9,6 +9,7 @@
     <string name="title_activity_search">Search</string>
     <string name="tab_item_download">Download</string>
     <string name="tab_item_norating">No rating.</string>
+    <string name="tab_item_rating">Average Rating: %1$d (%2$d votes)</string>
     <string name="gpsearch_notabs">No tabs found. Please try a different search.</string>
     <string name="tab_download_unsuccessful">Error downloading tab</string>
     <string name="tab_save_successful">Downloaded %1$s</string>
