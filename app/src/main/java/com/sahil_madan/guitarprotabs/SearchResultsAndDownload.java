@@ -6,6 +6,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -216,7 +217,7 @@ public class SearchResultsAndDownload extends ActionBarActivity {
 
             // Scrape page for tabs
             String currentArtist = "";
-            Elements elements = doc.select("a.song, span.r_1, span.r_2, span.r_3, span.r_4, span.r_5, b.ratdig");
+            Elements elements = doc.select("a.song, span.rating, b.ratdig");
             boolean obtainRating = false;
             boolean obtainVotes = false;
             for (Element em : elements) {
@@ -243,30 +244,21 @@ public class SearchResultsAndDownload extends ActionBarActivity {
                     continue;
                 }
 
-                if (obtainRating) {
-                    if (em.hasClass("r_1")) {
-                        tabs.get(tabs.size() - 1).rating = 1;
-                        obtainRating = false;
-                        continue;
-                    } else if (em.hasClass("r_2")) {
-                        tabs.get(tabs.size() - 1).rating = 2;
-                        obtainRating = false;
-                        continue;
-                    } else if (em.hasClass("r_3")) {
-                        tabs.get(tabs.size() - 1).rating = 3;
-                        obtainRating = false;
-                        continue;
-                    } else if (em.hasClass("r_4")) {
-                        tabs.get(tabs.size() - 1).rating = 4;
-                        obtainRating = false;
-                        continue;
-                    } else if (em.hasClass("r_5")) {
-                        tabs.get(tabs.size() - 1).rating = 5;
-                        obtainRating = false;
-                        continue;
+                // If rating found
+                if (obtainRating && em.hasClass("rating")) {
+                    double count = 0;
+                    for (Element r_em : em.children()) {
+                        if (r_em.hasClass("icon-rating-sm__active")) {
+                            count += 1;
+                        } else if (r_em.hasClass("icon-rating-sm__half")) {
+                            count += 0.5;
+                        }
                     }
+                    tabs.get(tabs.size() - 1).rating = count;
+                    obtainRating = false;
                 }
 
+                // If voting found
                 if (obtainVotes && em.hasClass("ratdig")) {
                     tabs.get(tabs.size() - 1).votes = Integer.parseInt(em.text());
                     obtainVotes = false;

@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 public class GPTabAdapter extends ArrayAdapter<GPTab> {
@@ -35,7 +36,7 @@ public class GPTabAdapter extends ArrayAdapter<GPTab> {
             rating.setText(context.getString(R.string.tab_item_norating));
         } else {
             String avg_rating = context.getString(R.string.tab_item_rating);
-            rating.setText(String.format(avg_rating, tab.rating, tab.votes));
+            rating.setText(String.format(avg_rating, new DecimalFormat("#.#").format(tab.rating), tab.votes));
         }
         Button download = (Button) convertView.findViewById(R.id.gptabitem_download);
 

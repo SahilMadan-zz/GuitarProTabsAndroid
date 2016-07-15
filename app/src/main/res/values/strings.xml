@@ -9,7 +9,7 @@
     <string name="title_activity_search">Search</string>
     <string name="tab_item_download">Download</string>
     <string name="tab_item_norating">No rating.</string>
-    <string name="tab_item_rating">Average Rating: %1$d (%2$d votes)</string>
+    <string name="tab_item_rating">Average Rating: %1$s (%2$d votes)</string>
     <string name="gpsearch_notabs">No tabs found. Please try a different search.</string>
     <string name="gpsearch_networkerror">There may be a network issue. Please check your internet connection.</string>
     <string name="tab_downloading">Downloading tab</string>
