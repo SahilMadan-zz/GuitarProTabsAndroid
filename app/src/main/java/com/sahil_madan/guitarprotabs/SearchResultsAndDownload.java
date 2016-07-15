@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -80,7 +81,7 @@ public class SearchResultsAndDownload extends ActionBarActivity {
     private String getURL()
     {
         String searchURL = "http://www.ultimate-guitar.com/search.php?title=%1$s&page=%2$d&tab_type_group=text&app_name=ugt&type=500&order=title_srt";
-        return String.format(searchURL, searchQuery, currentPageIndex);
+        return String.format(Locale.ENGLISH, searchURL, searchQuery, currentPageIndex);
     }
 
 

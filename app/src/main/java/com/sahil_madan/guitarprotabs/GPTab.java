@@ -1,8 +1,5 @@
 package com.sahil_madan.guitarprotabs;
 
-/**
- * Created by sahil on 23/03/2015.
- */
 public class GPTab {
     public String artist;
     public String song;
